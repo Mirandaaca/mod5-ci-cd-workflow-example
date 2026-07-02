@@ -1,0 +1,30 @@
+name: CI Pipeline               # Nombre del workflow, nombre visible en la pestaña de Actions
+
+on:        # Eventos que disparan el workflow
+    push:   # Evento push, cuando alguien hace un push a la rama main
+        branches: [main]  # Ramas que disparan el workflow
+
+    pull_request:  # Evento pull request, cuando alguien hace un PR a la rama main
+        branches: [main]  # Ramas que disparan el workflow
+
+    workflow_dispatch: # Permite ejecutar el workflow manualmente desde la pestaña de Actions
+
+jobs:           # Definición de los jobs que se ejecutarán en el workflow
+   run-test:    # Nombre del job
+    name: Run Test
+    runs-on: ubuntu-latest # Maquina donde se ejecutara el job (tipo de Runner)
+
+    steps:          # Pasos en orden que se ejecutarán en el job
+      - name: Run Test 
+      uses: actions/checkout@v3  # Acción para hacer checkout del repositorio, se activa en el Runner
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  # Acción para instalar Node.js en el Runner
+        with:
+            node-version: '20'  # Versión de Node.js a instalar
+
+      - name: Install Dependencies # Paso para instalar dependencias del proyecto
+        run: npm ci  # Comando para instalar dependencias usando npm ci (npm clean install), que es más rápido y confiable para entornos de CI/CD
+    
+      - name: Run Tests # Paso para ejecutar los tests del proyecto
+        run: npm test  # Comando para ejecutar los tests definidos en el proyecto
