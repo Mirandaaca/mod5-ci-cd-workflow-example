@@ -28,3 +28,12 @@ jobs:           # Definición de los jobs que se ejecutarán en el workflow
     
       - name: Run Tests # Paso para ejecutar los tests del proyecto
         run: npm test  # Comando para ejecutar los tests definidos en el proyecto
+    
+      - name: Run Tests with Coverage # Paso para ejecutar los tests con cobertura de código
+        run: npm test:coverage  # Comando para ejecutar los tests con cobertura de código definida en el proyecto
+
+      - name: Run Linter # Paso para ejecutar el linter del proyecto
+        run: npm run lint  # Comando para ejecutar el linter definido en el proyecto
+        
+      - name: Build Project # Paso para construir el proyecto
+        run: npm run build  # Comando para construir el proyecto definido en el package.json
