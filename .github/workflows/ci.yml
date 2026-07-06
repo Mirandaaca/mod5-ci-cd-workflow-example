@@ -1,36 +1,48 @@
-name: CI Pipeline               # Nombre del workflow, nombre visible en la pestaña de Actions
+name: CI Pipeline # Nombre del workflow, nombre visible en la pestaña de Actions
 
-on:        # Eventos que disparan el workflow
-    push:   # Evento push, cuando alguien hace un push a la rama main
-        branches: [main]  # Ramas que disparan el workflow
+on: # Eventos que disparan el workflow
+  push: # Evento push, cuando alguien hace un push a la rama main
+    branches: [main] # Ramas que disparan el workflow
 
-    pull_request:  # Evento pull request, cuando alguien hace un PR a la rama main
-        branches: [main]  # Ramas que disparan el workflow
+  pull_request: # Evento pull request, cuando alguien hace un PR a la rama main
+    branches: [main] # Ramas que disparan el workflow
 
-    workflow_dispatch: # Permite ejecutar el workflow manualmente desde la pestaña de Actions
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la pestaña de Actions
 
-jobs:           # Definición de los jobs que se ejecutarán en el workflow
-   run-test:    # Nombre del job
-    name: Run Test
-    runs-on: ubuntu-latest # Maquina donde se ejecutara el job (tipo de Runner)
+# Definir variables de entorno a nivel del workflow
+env:
+  # Variables de entorno que se pueden usar en todos los jobs y steps
+  NODE_VERSION: "18" # Versión de Node.js a usar
+  APP_NAME: "cron-ticker" # Nombre de la aplicación
 
-    steps:          # Pasos en orden que se ejecutarán en el job
-      - name: Run Test 
-        uses: actions/checkout@v3  # Acción para hacer checkout del repositorio, se activa en el Runner
+jobs: # Definición de jobs, cada job se ejecuta en un runner
+  build:
+    runs-on: ubuntu-latest # Sistema operativo del runner
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4  # Acción para instalar Node.js en el Runner
+    env: # Variables a nivel del job, no es accesible fuera del job, solo dentro del job
+      BUILD_DIR: dist # Directorio de construcción
+
+    steps: # Pasos a ejecutar en el job
+      - name: Checkout repository # Nombre del paso
+        uses: actions/checkout@v3 # Acción para hacer checkout del repositorio
+
+      - name: Show variables
+        run: | # Podemos mostrar variables de entorno con un echo y poniendo las variables entre llaves y con el prefijo env.
+          echo "App: ${{env.APP_NAME}}, Node: ${{env.NODE_VERSION}}" 
+          echo "Build Directory: ${{env.BUILD_DIR}}"
+      - name: Set up Node.js # Nombre del paso
+        uses: actions/setup-node@v3 # Acción para configurar Node.js
         with:
-            node-version: '20'  # Versión de Node.js a instalar
+          node-version: ${{ env.NODE_VERSION }} # Versión de Node.js a usar
 
-      - name: Install Dependencies # Paso para instalar dependencias del proyecto
-        run: npm ci  # Comando para instalar dependencias usando npm ci (npm clean install), que es más rápido y confiable para entornos de CI/CD
-    
-      - name: Run Tests # Paso para ejecutar los tests del proyecto
-        run: npm test  # Comando para ejecutar los tests definidos en el proyecto
-    
-      - name: Run Tests with Coverage # Paso para ejecutar los tests con cobertura de código
-        run: npm run test:coverage  # Comando para ejecutar los tests con cobertura de código definida en el proyecto
+      - name: Install dependencies # Nombre del paso
+        run: npm install # Comando para instalar dependencias
 
-      - name: Run Linter # Paso para ejecutar el linter del proyecto
-        run: npm run lint  # Comando para ejecutar el linter definido en el proyecto
+      - name: Run tests # Nombre del paso
+        run: npm test # Comando para ejecutar pruebas
+
+      - name: Build application # Nombre del paso
+        run: npm run build # Comando para construir la aplicación
+        # Variables a nivel de Step, estas variables solo estarán disponibles dentro de este paso (step)
+        env: # Variables de entorno específicas para este paso (step), estas variables solo estarán disponibles dentro de este paso (step)
+          APP_VERSION: "2.0.0" # Variable de entorno específica para este paso
