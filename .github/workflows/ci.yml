@@ -30,6 +30,9 @@ jobs: # Definición de jobs, cada job se ejecuta en un runner
         run: | # Podemos mostrar variables de entorno con un echo y poniendo las variables entre llaves y con el prefijo env.
           echo "App: ${{env.APP_NAME}}, Node: ${{env.NODE_VERSION}}" 
           echo "Build Directory: ${{env.BUILD_DIR}}"
+          printenv
+
+          
       - name: Set up Node.js # Nombre del paso
         uses: actions/setup-node@v3 # Acción para configurar Node.js
         with:
