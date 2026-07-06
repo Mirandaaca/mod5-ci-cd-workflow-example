@@ -2,7 +2,7 @@ name: CI Pipeline # Nombre del workflow, nombre visible en la pestaña de Action
 
 on: # Eventos que disparan el workflow
   push: # Evento push, cuando alguien hace un push a la rama main
-    branches: [main] # Ramas que disparan el workflow
+    branches: [main, tipos-de-variable/variables-de-entorno] # Ramas que disparan el workflow
 
   pull_request: # Evento pull request, cuando alguien hace un PR a la rama main
     branches: [main] # Ramas que disparan el workflow
