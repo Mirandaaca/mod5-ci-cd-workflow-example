@@ -1,5 +1,5 @@
 name: CI Pipeline Completo
-
+# Artifacts son archivos que se generan durante la ejecución de un workflow y que pueden ser almacenados y compartidos entre jobs o descargados después de la ejecución del workflow. Por ejemplo, los resultados de pruebas, archivos de compilación, registros de ejecución, etc.
 on:
   push:
     branches: [main, jobs-en-paralelo-y-secuencia]
@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm' # Habilita la cache de npm para acelerar la instalación de dependencias
       - run: npm clean-install
       - run: npm run lint
   # ========= JOB 2: Test =========
@@ -31,6 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
       - run: npm clean-install
       - name: Run Tests with Coverage
         run: npm run test:coverage
@@ -44,5 +46,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
       - run: npm clean-install
       - run: npm run build
