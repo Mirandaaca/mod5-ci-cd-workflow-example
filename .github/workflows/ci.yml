@@ -2,7 +2,7 @@ name: CI Pipeline Completo
 # Artifacts son archivos que se generan durante la ejecución de un workflow y que pueden ser almacenados y compartidos entre jobs o descargados después de la ejecución del workflow. Por ejemplo, los resultados de pruebas, archivos de compilación, registros de ejecución, etc.
 on:
   push:
-    branches: [main, jobs-en-paralelo-y-secuencia, artifacts-and-cache]
+    branches: [main, jobs-en-paralelo-y-secuencia, artifacts-and-cache, strategies-on-jobs]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -12,13 +12,18 @@ env:
 
 jobs:
   test:
-    name: Tests
+    name: Test matrix Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [24, 22, 20, 18]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node Js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - name: Install dependencies
         run: npm clean-install
@@ -32,40 +37,3 @@ jobs:
           name: coverage-${{ github.sha }}
           path: coverage/
           retention-days: 5
-  build: 
-    name: Build
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm clean-install
-      - name: Build project
-        run: npm run build
-        env:
-          APP_VERSION: ${{ vars.APP_VERSION || '1.0.0' }}
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: build-${{ github.sha }}
-          path: dist/
-          retention-days: 7
-
-  deploy: 
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Download build artifact # Este step descarga el artefacto generado en el job de build. El artefacto contiene los archivos de construcción de la aplicación que se generaron en el paso anterior. Esto permite que el job de despliegue tenga acceso a los archivos necesarios para realizar el despliegue.
-        uses: actions/download-artifact@v4
-        with:
-          name: build-${{ github.sha }}
-          path: dist/
-      
-      - name: Deploy # Este step simula el despliegue de la aplicación. En un escenario real, aquí se podrían agregar comandos para subir los archivos a un servidor, ejecutar scripts de despliegue, etc.
-        run: |
-          echo "Deploying $(cat dist/build-info.json)"
