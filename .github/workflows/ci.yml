@@ -35,7 +35,7 @@ jobs: # Definición de jobs, cada job se ejecuta en un runner
       - name: Show GitHub Actions Variables
         run: | # Podemos mostrar variables de entorno con un echo y poniendo las variables entre llaves y con el prefijo vars. Estas variables son específicas de GitHub Actions y no se pueden definir manualmente.
           echo "App version: ${{vars.APP_VERSION}}"
-
+          echo "Node version: ${{vars.NODE_VERSION}}"
           
       - name: Set up Node.js # Nombre del paso
         uses: actions/setup-node@v3 # Acción para configurar Node.js
