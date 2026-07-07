@@ -29,7 +29,7 @@ jobs:
         # Esto asegura que el paso de subir artefactos se ejecute incluso si los pasos anteriores fallan
         if: always()
         with:
-          name: coverage-{{ github.sha }}
+          name: coverage-${{ github.sha }}
           path: coverage/
           retention-days: 5
   build: 
@@ -51,6 +51,21 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: build-{{ github.sha }}
+          name: build-${{ github.sha }}
           path: dist/
           retention-days: 7
+
+  deploy: 
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download build artifact # Este step descarga el artefacto generado en el job de build. El artefacto contiene los archivos de construcción de la aplicación que se generaron en el paso anterior. Esto permite que el job de despliegue tenga acceso a los archivos necesarios para realizar el despliegue.
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+      
+      - name: Deploy # Este step simula el despliegue de la aplicación. En un escenario real, aquí se podrían agregar comandos para subir los archivos a un servidor, ejecutar scripts de despliegue, etc.
+        run: |
+          echo "Deploying $(cat dist/build-info.json)"
