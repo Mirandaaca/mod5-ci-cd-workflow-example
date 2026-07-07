@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - run: npm clean install
+      - run: npm clean-install
       - run: npm run lint
   # ========= JOB 2: Test =========
   test:
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - run: npm clean install
+      - run: npm clean-install
       - name: Run Tests with Coverage
         run: npm run test:coverage
   # ========= JOB 3: Build =========
@@ -44,5 +44,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - run: npm clean install
+      - run: npm clean-install
       - run: npm run build
