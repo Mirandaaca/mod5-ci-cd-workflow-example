@@ -39,6 +39,9 @@ jobs: # Definición de jobs, cada job se ejecuta en un runner
       - name: Deploy API # Usando secrets, para este ejemplo mi api key es mi-api-key-super-secreta
         run: | # Usando secrets, estas variables son seguras y no se pueden ver en los logs, se definen en la configuración del repositorio
           echo "Deploying with API key: ${{ secrets.API_KEY }}"
+      - name: Show ChatGPT API Key
+        run: |
+          echo "ChatGPT API Key: ${{ secrets.CHATGPT_API_KEY }}"
       - name: Show Node Version from GitHub Actions Variables
         run: |
           echo "Node version: ${{vars.NODE_VERSION}}"  
