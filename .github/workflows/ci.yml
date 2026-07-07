@@ -2,7 +2,7 @@ name: CI Pipeline # Nombre del workflow, nombre visible en la pestaña de Action
 
 on: # Eventos que disparan el workflow
   push: # Evento push, cuando alguien hace un push a la rama main
-    branches: [main, tipos-de-variable/variables-de-entorno, tipos-de-variable/variables-de-github-actions] # Ramas que disparan el workflow
+    branches: [main, tipos-de-variable/variables-de-entorno, tipos-de-variable/variables-de-github-actions, tipos-de-variable/secrets-en-github-actions] # Ramas que disparan el workflow
 
   pull_request: # Evento pull request, cuando alguien hace un PR a la rama main
     branches: [main] # Ramas que disparan el workflow
@@ -35,6 +35,10 @@ jobs: # Definición de jobs, cada job se ejecuta en un runner
       - name: Show GitHub Actions Variables
         run: | # Podemos mostrar variables de entorno con un echo y poniendo las variables entre llaves y con el prefijo vars. Estas variables son específicas de GitHub Actions y no se pueden definir manualmente.
           echo "App version: ${{vars.APP_VERSION}}"
+
+      - name: Deploy API # Usando secrets, para este ejemplo mi api key es mi-api-key-super-secreta
+        run: | # Usando secrets, estas variables son seguras y no se pueden ver en los logs, se definen en la configuración del repositorio
+          echo "Deploying with API key: ${{ secrets.API_KEY }}"
       - name: Show Node Version from GitHub Actions Variables
         run: |
           echo "Node version: ${{vars.NODE_VERSION}}"  
