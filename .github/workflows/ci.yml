@@ -2,7 +2,7 @@ name: CI Pipeline Completo
 # Artifacts son archivos que se generan durante la ejecución de un workflow y que pueden ser almacenados y compartidos entre jobs o descargados después de la ejecución del workflow. Por ejemplo, los resultados de pruebas, archivos de compilación, registros de ejecución, etc.
 on:
   push:
-    branches: [main, jobs-en-paralelo-y-secuencia]
+    branches: [main, jobs-en-paralelo-y-secuencia, artifacts-and-cache]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -11,41 +11,23 @@ env:
   NODE_VERSION: "24"
 
 jobs:
-  # ========= JOB 1: Lint =========
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm' # Habilita la cache de npm para acelerar la instalación de dependencias
-      - run: npm clean-install
-      - run: npm run lint
-  # ========= JOB 2: Test =========
   test:
+    name: Tests
     runs-on: ubuntu-latest
-    needs: lint # Este job se ejecutara despues de que el job de lint haya finalizado correctamente
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm clean-install
-      - name: Run Tests with Coverage
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Run tests with coverage
         run: npm run test:coverage
-  # ========= JOB 3: Build =========
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: test # Este job se ejecutara despues de que el job de test haya finalizado correctamente
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4 # Actions permite subir artefactos generados durante la ejecución del workflow para que puedan ser descargados posteriormente. En este caso, se sube el reporte de cobertura de pruebas.
+        # Esto asegura que el paso de subir artefactos se ejecute incluso si los pasos anteriores fallan
+        if: always()
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm clean-install
-      - run: npm run build
+          name: coverage-{{github.sha}}
+          path: coverage/
+          retention-days: 5
