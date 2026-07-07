@@ -2,7 +2,7 @@ name: CI Pipeline Completo
 
 on:
   push:
-    branches: [main]
+    branches: [main, jobs-en-paralelo-y-secuencia]
   pull_request:
     branches: [main]
   workflow_dispatch:
