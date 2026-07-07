@@ -1,63 +1,48 @@
-name: CI Pipeline # Nombre del workflow, nombre visible en la pestaña de Actions
+name: CI Pipeline Completo
 
-on: # Eventos que disparan el workflow
-  push: # Evento push, cuando alguien hace un push a la rama main
-    branches: [main, tipos-de-variable/variables-de-entorno, tipos-de-variable/variables-de-github-actions, tipos-de-variable/secrets-en-github-actions] # Ramas que disparan el workflow
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
-  pull_request: # Evento pull request, cuando alguien hace un PR a la rama main
-    branches: [main] # Ramas que disparan el workflow
-
-  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la pestaña de Actions
-
-# Definir variables de entorno a nivel del workflow
 env:
-  # Variables de entorno que se pueden usar en todos los jobs y steps
-  NODE_VERSION: "18" # Versión de Node.js a usar
-  APP_NAME: "cron-ticker" # Nombre de la aplicación
+  NODE_VERSION: "24"
 
-jobs: # Definición de jobs, cada job se ejecuta en un runner
-  build:
-    runs-on: ubuntu-latest # Sistema operativo del runner
-
-    env: # Variables a nivel del job, no es accesible fuera del job, solo dentro del job
-      BUILD_DIR: dist # Directorio de construcción
-
-    steps: # Pasos a ejecutar en el job
-      - name: Checkout repository # Nombre del paso
-        uses: actions/checkout@v3 # Acción para hacer checkout del repositorio
-
-      - name: Show variables
-        run: | # Podemos mostrar variables de entorno con un echo y poniendo las variables entre llaves y con el prefijo env.
-          echo "App: ${{env.APP_NAME}}, Node: ${{env.NODE_VERSION}}" 
-          echo "Build Directory: ${{env.BUILD_DIR}}"
-          printenv
-
-      - name: Show GitHub Actions Variables
-        run: | # Podemos mostrar variables de entorno con un echo y poniendo las variables entre llaves y con el prefijo vars. Estas variables son específicas de GitHub Actions y no se pueden definir manualmente.
-          echo "App version: ${{vars.APP_VERSION}}"
-
-      - name: Deploy API # Usando secrets, para este ejemplo mi api key es mi-api-key-super-secreta
-        run: | # Usando secrets, estas variables son seguras y no se pueden ver en los logs, se definen en la configuración del repositorio
-          echo "Deploying with API key: ${{ secrets.API_KEY }}"
-      - name: Show ChatGPT API Key
-        run: |
-          echo "ChatGPT API Key: ${{ secrets.CHATGPT_API_KEY }}"
-      - name: Show Node Version from GitHub Actions Variables
-        run: |
-          echo "Node version: ${{vars.NODE_VERSION}}"  
-      - name: Set up Node.js # Nombre del paso
-        uses: actions/setup-node@v3 # Acción para configurar Node.js
+jobs:
+  # ========= JOB 1: Lint =========
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }} # Versión de Node.js a usar
-
-      - name: Install dependencies # Nombre del paso
-        run: npm install # Comando para instalar dependencias
-
-      - name: Run tests # Nombre del paso
-        run: npm test # Comando para ejecutar pruebas
-
-      - name: Build application # Nombre del paso
-        run: npm run build # Comando para construir la aplicación
-        # Variables a nivel de Step, estas variables solo estarán disponibles dentro de este paso (step)
-        env: # Variables de entorno específicas para este paso (step), estas variables solo estarán disponibles dentro de este paso (step)
-          APP_VERSION: "2.0.0" # Variable de entorno específica para este paso
+          node-version: ${{ env.NODE_VERSION }}
+      - run: npm clean install
+      - run: npm run lint
+  # ========= JOB 2: Test =========
+  test:
+    runs-on: ubuntu-latest
+    needs: lint # Este job se ejecutara despues de que el job de lint haya finalizado correctamente
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: npm clean install
+      - name: Run Tests with Coverage
+        run: npm run test:coverage
+  # ========= JOB 3: Build =========
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test # Este job se ejecutara despues de que el job de test haya finalizado correctamente
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: npm clean install
+      - run: npm run build
